@@ -5,6 +5,9 @@ import org.example.digital_banking.entities.BankAccount;
 import org.example.digital_banking.entities.Customer;
 import org.example.digital_banking.entities.Operation;
 import org.example.digital_banking.enums.Operation_type;
+import org.example.digital_banking.exceptions.BankAccountNotFoundException;
+import org.example.digital_banking.exceptions.CustomerNotFoundException;
+import org.example.digital_banking.exceptions.InsufficientBalanceException;
 import org.example.digital_banking.repositories.BankAccountRepo;
 import org.example.digital_banking.repositories.CustomerRepo;
 import org.example.digital_banking.repositories.OperationRepo;
@@ -38,7 +41,8 @@ public class CustomerService  implements CustomerServiceinterface{
     }
 
     public Customer getClientById(Long id) {
-        return customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+        return customerRepo.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with id: " + id));
     }
 
     public Customer createClient(Customer customer) {
@@ -70,7 +74,7 @@ public class CustomerService  implements CustomerServiceinterface{
 
     public BankAccount getAccount(String id) {
         return bankAccountRepo.findById(Long.valueOf(id))
-                .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+                .orElseThrow(() -> new BankAccountNotFoundException("Account not found with id: " + id));
     }
 
     public BankAccount createAccountForCustomer(Long clientId, BankAccount account) {
@@ -81,6 +85,7 @@ public class CustomerService  implements CustomerServiceinterface{
 
     public BankAccount updateAccount(String id, BankAccount updatedAccount) {
         BankAccount existing = getAccount(id);
+
         existing.setBalance(updatedAccount.getBalance());
         existing.setCurrency(updatedAccount.getCurrency());
         existing.setStatus(updatedAccount.getStatus());
@@ -98,7 +103,8 @@ public class CustomerService  implements CustomerServiceinterface{
 
     public void debit(String id, double amount, String description) {
         BankAccount account = getAccount(id);
-        if (account.getBalance() < amount) throw new RuntimeException("Insufficient balance");
+        if (account.getBalance() < amount)
+            throw new InsufficientBalanceException("Insufficient balance for account ID: " + id);
         account.setBalance(account.getBalance() - amount);
         Operation operation = new Operation();
         operation.setAmount(amount);
@@ -121,6 +127,10 @@ public class CustomerService  implements CustomerServiceinterface{
 
     public List<Operation> getAccountOperations(String id) {
         BankAccount account = getAccount(id);
-        return operationRepo.findByBankAccount(account);
+        List<Operation> operations = operationRepo.findByBankAccount(account);
+        if (operations.isEmpty()) {
+            throw new BankAccountNotFoundException("Account not found with id: " + id);
+        }
+        return operations;
     }
 }

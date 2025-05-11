@@ -1,5 +1,7 @@
 package org.example.digital_banking.entities;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -15,7 +17,15 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type",length = 4)
 
-
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = SavingAccount.class, name = "SAV"),
+        @JsonSubTypes.Type(value = CurrentAccount.class, name = "CUR")
+})
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class BankAccount {

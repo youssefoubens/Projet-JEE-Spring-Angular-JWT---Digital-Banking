@@ -25,7 +25,7 @@ public class DigitalBankingApplication {
     }
 
 
-    @Bean
+
     public CommandLineRunner commandLineRunner(CustomerRepo customerRepo, BankAccountRepo bankAccountRepo, OperationRepo operationRepo) {
         return args -> {
             for (int i = 0; i < 10; i++) {
