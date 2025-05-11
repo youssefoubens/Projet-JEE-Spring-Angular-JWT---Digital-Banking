@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.example.digital_banking.enums.AccountStatus;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Date;
+
 @SuperBuilder
 @Entity
 @Data
@@ -34,7 +36,7 @@ public abstract class BankAccount {
     private double balance;
     private AccountStatus status;
     private String currency;
-
+    private Date createdAt;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id")
     private Customer customer;

@@ -1,7 +1,7 @@
 package org.example.digital_banking.web;
 
-import org.example.digital_banking.entities.Customer;
-
+import org.example.digital_banking.dtos.CustomerDTO;
+import org.example.digital_banking.exceptions.CustomerNotFoundException;
 import org.example.digital_banking.services.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,43 +13,62 @@ import java.util.List;
 @RequestMapping("/customers")
 public class CustomerController {
 
-    private final CustomerService clientService;
+    private final CustomerService customerService;
 
-    public CustomerController(CustomerService clientService) {
-        this.clientService = clientService;
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
     }
 
     // GET /customers — lister tous les clients
     @GetMapping
-    public List<Customer> getAllCustomers() {
-        return clientService.getAllClients();
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        List<CustomerDTO> customers = customerService.getAllClients();
+        return ResponseEntity.ok(customers);
     }
 
     // GET /customers/{id} — afficher un client
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
-        Customer customer = clientService.getClientById(id);
-        return customer != null ? ResponseEntity.ok(customer) : ResponseEntity.notFound().build();
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
+        try {
+            CustomerDTO customer = customerService.getClientById(id);
+            return ResponseEntity.ok(customer);
+        } catch (CustomerNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // POST /customers — créer un nouveau client
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
-        Customer savedCustomer = clientService.createClient(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
+    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO customerDTO) {
+        try {
+            CustomerDTO savedCustomer = customerService.createClient(customerDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // PUT /customers/{id} — modifier un client
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails) {
-        Customer updatedCustomer = clientService.updateClient(id, customerDetails);
-        return updatedCustomer != null ? ResponseEntity.ok(updatedCustomer) : ResponseEntity.notFound().build();
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable Long id,
+            @RequestBody CustomerDTO customerDTO) {
+        try {
+            CustomerDTO updatedCustomer = customerService.updateClient(id, customerDTO);
+            return ResponseEntity.ok(updatedCustomer);
+        } catch (CustomerNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // DELETE /customers/{id} — supprimer un client
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-        boolean deleted = clientService.deleteClient(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        try {
+            customerService.deleteClient(id);
+            return ResponseEntity.noContent().build();
+        } catch (CustomerNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

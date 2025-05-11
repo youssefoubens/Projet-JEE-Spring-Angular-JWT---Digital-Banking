@@ -1,28 +1,26 @@
 package org.example.digital_banking.services;
 
-import org.example.digital_banking.entities.BankAccount;
-import org.example.digital_banking.entities.Customer;
-import org.example.digital_banking.entities.Operation;
+import org.example.digital_banking.dtos.*;
 import java.util.List;
 
 public interface CustomerServiceinterface {
-
     // Customer management
-    List<Customer> getAllClients();
-    Customer getClientById(Long id);
-    Customer createClient(Customer customer);
-    Customer updateClient(Long id, Customer customerDetails);
+    List<CustomerDTO> getAllClients();
+    CustomerDTO getClientById(Long id);
+    CustomerDTO createClient(CustomerDTO customerDTO);
+    CustomerDTO updateClient(Long id, CustomerDTO customerDTO);
     boolean deleteClient(Long id);
 
     // Bank account management
-    List<BankAccount> getAllAccounts();
-    BankAccount getAccount(String id);
-    BankAccount createAccountForCustomer(Long clientId, BankAccount account);
-    BankAccount updateAccount(String id, BankAccount updatedAccount);
-    boolean deleteAccount(String id);
+    List<BankAccountDTO> getAllAccounts();
+    BankAccountDTO getAccount(Long id);
+    BankAccountDTO createAccount(BankAccountRequestDTO accountDTO);
+    BankAccountDTO updateAccount(Long id, BankAccountDTO bankAccountDTO);
+    boolean deleteAccount(Long id);
 
     // Operations
-    void debit(String id, double amount, String description);
-    void credit(String id, double amount, String description);
-    List<Operation> getAccountOperations(String id);
+    void debit(Long accountId, CreditDebitRequestDTO requestDTO);
+    void credit(Long accountId, CreditDebitRequestDTO requestDTO);
+    void transfer(TransferRequestDTO transferRequestDTO);
+    List<AccountOperationDTO> getAccountOperations(Long accountId);
 }
